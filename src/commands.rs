@@ -4,6 +4,7 @@ use chrono;
 use sqlx::PgPool;
 use teloxide::RequestError;
 use teloxide::{prelude::*, utils::command::BotCommands};
+use speedate::Date;
 
 
 #[derive(BotCommands, Clone)]
@@ -43,22 +44,28 @@ pub async fn handle_command(
             bot.send_message(chat_id, &format!("Expense added for {}", username)).await.log_on_error().await;
         },
         Command::Stat {date_start, date_end}  => {
-            match db::get_expenses_by_date(&pool, &date_start, &date_end).await {
-                Ok(expenses) => {
-                    // Sum expenses by username
-                    let mut totals: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
-                    for exp in expenses {
-                        *totals.entry(exp.username.clone()).or_insert(0.0) += exp.price;
+            match (Date::parse_str(&date_start), Date::parse_str(&date_end)) {
+                (Ok(date_start), Ok(date_end)) => {
+                    match db::get_expenses_by_date(&pool, date_start, date_end).await {
+                        Ok(expenses) => {
+                            let mut totals: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
+                            for exp in expenses {
+                                *totals.entry(exp.username.clone()).or_insert(0.0) += exp.price;
+                            }
+                            let mut message = String::from("Expense Summary:\n");
+                            for (username, total) in totals {
+                                message.push_str(&format!("{}: {:.2}\n", username, total));
+                            }
+                            bot.send_message(chat_id, message).await.log_on_error().await;
+                        },
+                        Err(e) => {
+                            eprintln!("Error getting expenses: {}", e);
+                            bot.send_message(chat_id, "An error occured").await.log_on_error().await;
+                        }
                     }
-                    let mut message = String::from("Expense Summary:\n");
-                    for (username, total) in totals {
-                        message.push_str(&format!("{}: {:.2}\n", username, total));
-                    }
-                    bot.send_message(chat_id, message).await.log_on_error().await;
-                },
-                Err(e) => {
-                    eprintln!("Error getting expenses: {}", e);
-                    bot.send_message(chat_id, "An error occured").await.log_on_error().await;
+                }
+                (Err(_), _) | (_, Err(_))  => {
+                    bot.send_message(chat_id, "Wrong date formats").await.log_on_error().await;
                 }
             }
         },

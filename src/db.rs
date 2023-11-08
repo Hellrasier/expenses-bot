@@ -1,3 +1,4 @@
+use speedate::Date;
 use sqlx::{PgPool, query, query_as};
 use crate::models::Expense;
 
@@ -16,12 +17,12 @@ pub async fn add_expense(pool: &PgPool, expense: &Expense) -> Result<u64, sqlx::
     Ok(result.rows_affected())
 }
 
-pub async fn get_expenses_by_date(pool: &PgPool, date_start: &str, date_end: &str) -> Result<Vec<Expense>, sqlx::Error> {
+pub async fn get_expenses_by_date(pool: &PgPool, date_start: Date, date_end: Date) -> Result<Vec<Expense>, sqlx::Error> {
     let expenses = query_as::<_, Expense>(
         "SELECT user_id, username, price, comments, date FROM expenses WHERE date BETWEEN $1 AND $2"
     )
-    .bind(date_start)
-    .bind(date_end)
+    .bind(date_start.to_string())
+    .bind(date_end.to_string())
     .fetch_all(pool)
     .await?;
 
