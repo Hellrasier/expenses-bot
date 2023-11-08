@@ -5,7 +5,6 @@ use chrono::NaiveDate;
 use sqlx::PgPool;
 use teloxide::RequestError;
 use teloxide::{prelude::*, utils::command::BotCommands};
-use speedate::Date;
 
 
 #[derive(BotCommands, Clone)]
