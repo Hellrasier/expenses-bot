@@ -38,8 +38,8 @@ pub async fn handle_command(
             };
 
             match db::add_expense(&pool, &expense).await {
-                Ok(_) => println!("Expense added"),
-                Err(e) => eprintln!("Error adding expense: {}", e),
+                Ok(_) => log::info!("Expense added"),
+                Err(e) => log::error!("Error adding expense: {}", e),
             }
 
             bot.send_message(chat_id, &format!("Expense added for {}", username)).await.log_on_error().await;
