@@ -11,7 +11,7 @@ use teloxide::{prelude::*, utils::command::BotCommands};
 #[command(rename_rule = "lowercase", description = "These commands are supported:")]
 pub enum Command {
     #[command(description = "add an expense.", parse_with = "split")]
-    Check {price: f64, comments: String },
+    Check {price: f32, comments: String },
     #[command(description = "get statistics.", parse_with = "split")]
     Stat { date_start: String, date_end: String },
     #[command(description = "start")]
@@ -54,7 +54,7 @@ pub async fn handle_command(
                     match db::get_expenses_by_date(&pool, date_start, date_end).await {
                         Ok(expenses) => {
                             log::info!("Got expenses: {:?}", expenses.iter().map(|x| format!("{}, {}", x.username, x.price)).collect::<Vec<_>>());
-                            let mut totals: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
+                            let mut totals: std::collections::HashMap<String, f32> = std::collections::HashMap::new();
                             for exp in expenses {
                                 *totals.entry(exp.username.clone()).or_insert(0.0) += exp.price;
                             }
