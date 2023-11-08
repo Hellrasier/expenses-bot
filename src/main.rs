@@ -17,6 +17,7 @@ async fn main(
     let token = secrets.get("BOT_TOKEN")
         .expect("Bot token is required");
 
+
     Ok(BotService::new(token, pool))
 }
 
@@ -26,6 +27,7 @@ impl shuttle_runtime::Service for BotService {
     async fn bind(self, _addr: std::net::SocketAddr) -> Result<(), shuttle_runtime::Error> {
         self.run().await
             .expect("An error occured when starting the bot");
+        println!("Bot running...");
         Ok(())
     }
 }

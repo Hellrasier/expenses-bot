@@ -29,7 +29,7 @@ pub async fn handle_command(
         Command::Check { price, comments} => {
             let expense = Expense {                     
                 user_id,
-                username,
+                username: username.clone(),
                 price,
                 comments,
                 date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
@@ -39,6 +39,8 @@ pub async fn handle_command(
                 Ok(_) => println!("Expense added"),
                 Err(e) => eprintln!("Error adding expense: {}", e),
             }
+
+            bot.send_message(chat_id, &format!("Expense added for {}", username)).await.log_on_error().await;
         },
         Command::Stat {date_start, date_end}  => {
             match db::get_expenses_by_date(&pool, &date_start, &date_end).await {
@@ -54,7 +56,10 @@ pub async fn handle_command(
                     }
                     bot.send_message(chat_id, message).await.log_on_error().await;
                 },
-                Err(e) => eprintln!("Error getting expenses: {}", e),
+                Err(e) => {
+                    eprintln!("Error getting expenses: {}", e);
+                    bot.send_message(chat_id, "An error occured").await.log_on_error().await;
+                }
             }
         },
         Command::Start() => {

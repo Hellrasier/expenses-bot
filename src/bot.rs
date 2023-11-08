@@ -10,6 +10,7 @@ pub struct BotService {
 
 impl BotService {
     pub fn new(token: String, pool: PgPool) -> Self {
+        println!("{}", token);
         BotService { pool: pool, bot: Bot::new(token) }
     }
 
@@ -19,11 +20,14 @@ impl BotService {
         let bot = self.bot.clone();
         let conn = self.pool.clone();
 
-        let _  = Dispatcher::builder(
+        Dispatcher::builder(
             bot, 
             Update::filter_message().endpoint(answer),
         )
-        .dependencies(dptree::deps![conn]);
+        .dependencies(dptree::deps![conn])
+        .build()
+        .dispatch()
+        .await;
         
         Ok(())
     }
