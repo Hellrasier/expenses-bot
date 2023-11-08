@@ -50,6 +50,7 @@ pub async fn handle_command(
                 (Ok(date_start), Ok(date_end)) => {
                     match db::get_expenses_by_date(&pool, date_start, date_end).await {
                         Ok(expenses) => {
+                            log::info!("Got expenses: {:?}", expenses.iter().map(|x| format!("{}, {}", x.username, x.price)).collect::<Vec<_>>());
                             let mut totals: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
                             for exp in expenses {
                                 *totals.entry(exp.username.clone()).or_insert(0.0) += exp.price;
