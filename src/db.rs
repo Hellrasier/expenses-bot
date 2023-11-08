@@ -25,3 +25,12 @@ pub async fn get_expenses_by_date(pool: &PgPool, date_start: NaiveDate, date_end
     .fetch_all(pool)
     .await
 }
+
+pub async fn get_expenses_history(pool: &PgPool, username: &String) -> Result<Vec<Expense>, sqlx::Error> {
+    query_as::<_, Expense>(
+        "SELECT user_id, username, price, comments, date FROM new_expenses WHERE username = $1"
+    )
+    .bind(username)
+    .fetch_all(pool)
+    .await
+}

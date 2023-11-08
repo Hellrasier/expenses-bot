@@ -14,6 +14,8 @@ pub enum Command {
     Check {price: f32, comments: String },
     #[command(description = "get statistics.", parse_with = "split")]
     Stat { date_start: String, date_end: String },
+    #[command(description = "history of expenses")]
+    Hist(String),
     #[command(description = "start")]
     Start,
 }
@@ -48,7 +50,6 @@ pub async fn handle_command(
             }
         },
         Command::Stat {date_start, date_end}  => {
-            log::info!("{}, {}", date_start, date_end);
             match (NaiveDate::parse_from_str(&date_start, "%Y-%m-%d"), NaiveDate::parse_from_str(&date_end, "%Y-%m-%d")) {
                 (Ok(date_start), Ok(date_end)) => {
                     match db::get_expenses_by_date(&pool, date_start, date_end).await {
@@ -80,6 +81,25 @@ pub async fn handle_command(
                 }
             }
         },
+        Command::Hist(username) => {
+            match (db::get_expenses_history(&pool, &username)).await {
+                Ok(expenses) => {
+                    if expenses.len() > 0 {
+                        let mut message = format!("History of {}\n", username);
+                        for expense in expenses {
+                            message.push_str(&format!("{}   spent {}$    on {}\n", expense.date, expense.price, expense.comments));
+                        }
+                        bot.send_message(chat_id, message).await.log_on_error().await;
+                    } else {
+                        bot.send_message(chat_id, format!("No history recorded for {}", username)).await.log_on_error().await;
+                    }
+                }
+                Err(e) => {
+                    log::error!("Error getting expenses: {}", e);
+                    bot.send_message(chat_id, "An error occured").await.log_on_error().await;
+                }
+            }
+        }
         Command::Start => {
             bot.send_message(chat_id, "Hello!").await.log_on_error().await;
         }
