@@ -12,10 +12,18 @@ pub async fn add_expense(pool: &PgPool, expense: &Expense) -> Result<u64, sqlx::
         .execute(pool)
         .await?;
 
+    log::info!("Rows affected: {}", result.rows_affected());
     Ok(result.rows_affected())
 }
 
 pub async fn get_expenses_by_date(pool: &PgPool, date_start: NaiveDate, date_end: NaiveDate) -> Result<Vec<Expense>, sqlx::Error> {
+    let check_result = query_as::<_, Expense>(
+        "SELECT user_id, username, price, comments, date FROM expenses"
+    )
+    .fetch_all(pool).await?;
+
+    log::info!("Got all expenses: {:?}", check_result.iter().map(|x| format!("{}, {}", x.username, x.price)).collect::<Vec<_>>());
+
     query_as::<_, Expense>(
         "SELECT user_id, username, price, comments, date FROM expenses WHERE date >= $1 AND date < $2"
     )
