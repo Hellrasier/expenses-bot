@@ -1,6 +1,7 @@
 use crate::db;
 use crate::models::Expense;
 use chrono;
+use chrono::NaiveDate;
 use sqlx::PgPool;
 use teloxide::RequestError;
 use teloxide::{prelude::*, utils::command::BotCommands};
@@ -44,7 +45,8 @@ pub async fn handle_command(
             bot.send_message(chat_id, &format!("Expense added for {}", username)).await.log_on_error().await;
         },
         Command::Stat {date_start, date_end}  => {
-            match (Date::parse_str(&date_start), Date::parse_str(&date_end)) {
+            log::info!("{}, {}", date_start, date_end);
+            match (NaiveDate::parse_from_str(&date_start, "%Y-%m-%d"), NaiveDate::parse_from_str(&date_end, "%Y-%m-%d")) {
                 (Ok(date_start), Ok(date_end)) => {
                     match db::get_expenses_by_date(&pool, date_start, date_end).await {
                         Ok(expenses) => {
