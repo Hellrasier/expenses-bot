@@ -3,7 +3,6 @@ use sqlx::PgPool;
 use crate::commands::{handle_command, Command};
 use shuttle_runtime::CustomError;
 
-
 pub struct BotService {
     pool: PgPool,
     bot: Bot,
@@ -20,7 +19,7 @@ impl BotService {
         let bot = self.bot.clone();
         let conn = self.pool.clone();
 
-        Dispatcher::builder(
+        let _  = Dispatcher::builder(
             bot, 
             Update::filter_message().endpoint(answer),
         )
@@ -34,6 +33,7 @@ async fn answer(bot: Bot, conn: PgPool, msg: Message, command: Command) -> Respo
     let user_id = msg.from().unwrap().id;
     let username = msg.from().unwrap().username.clone().unwrap_or_else(|| "unknown".to_string());
     let chat_id = msg.chat.id;
-    handle_command(bot, command, conn, user_id.0, username, chat_id);
+    handle_command(bot, command, conn, i64::try_from(user_id.0).unwrap(), username, chat_id)
+        .await.log_on_error().await;
     Ok(())
 }

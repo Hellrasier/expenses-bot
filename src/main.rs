@@ -12,7 +12,7 @@ async fn main(
     #[shuttle_shared_db::Postgres] pool: PgPool,
 ) -> Result<BotService, shuttle_runtime::Error> {
 
-    sqlx::migrate!().run(&pool).await.map_err(|e| format!("Oh no! Migrations failed :( {e}"));
+    let _ = sqlx::migrate!().run(&pool).await.map_err(|e| format!("Oh no! Migrations failed :( {e}"));
 
     let token = secrets.get("BOT_TOKEN")
         .expect("Bot token is required");

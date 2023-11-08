@@ -20,8 +20,8 @@ pub enum Command {
 pub async fn handle_command(
     bot: Bot,
     command: Command, 
-    conn: PgPool, 
-    user_id: u64, 
+    pool: PgPool, 
+    user_id: i64, 
     username: String,
     chat_id: ChatId,
 ) -> Result<(), RequestError> {
@@ -35,13 +35,13 @@ pub async fn handle_command(
                 date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
             };
 
-            match db::add_expense(conn, &expense).await {
+            match db::add_expense(&pool, &expense).await {
                 Ok(_) => println!("Expense added"),
                 Err(e) => eprintln!("Error adding expense: {}", e),
             }
         },
         Command::Stat {date_start, date_end}  => {
-            match db::get_expenses_by_date(conn, &date_start, &date_end).await {
+            match db::get_expenses_by_date(&pool, &date_start, &date_end).await {
                 Ok(expenses) => {
                     // Sum expenses by username
                     let mut totals: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
