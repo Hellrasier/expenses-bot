@@ -39,7 +39,7 @@ pub async fn handle_command(
             match db::add_expense(&pool, &expense).await {
                 Ok(_) => {
                     log::info!("Expense added");
-                    bot.send_message(chat_id, &format!("Expense added for {}", username)).await.log_on_error().await;
+                    bot.send_message(chat_id, &format!("Expense added for @{}", username)).await.log_on_error().await;
                 }
                 Err(e) => {
                     log::error!("Error adding expense: {}", e);
@@ -60,7 +60,7 @@ pub async fn handle_command(
                             }
                             let mut message = String::from("Expense Summary:\n");
                             for (username, total) in totals {
-                                message.push_str(&format!("{}: {:.2}\n", username, total));
+                                message.push_str(&format!("{}: {:.2}$\n", username, total));
                             }
                             bot.send_message(chat_id, message).await.log_on_error().await;
                         },
