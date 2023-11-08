@@ -4,7 +4,7 @@ PRAGMA foreign_keys=off;
 
 BEGIN TRANSACTION;
 
-CREATE TABLE IF NOT EXISTS expenses (
+CREATE TABLE IF NOT EXISTS new_expenses (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
   username TEXT NOT NULL,
