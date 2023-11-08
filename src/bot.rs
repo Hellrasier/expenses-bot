@@ -10,7 +10,6 @@ pub struct BotService {
 
 impl BotService {
     pub fn new(token: String, pool: PgPool) -> Self {
-        println!("{}", token);
         BotService { pool: pool, bot: Bot::new(token) }
     }
 
@@ -37,6 +36,7 @@ async fn answer(bot: Bot, conn: PgPool, msg: Message, command: Command) -> Respo
     let user_id = msg.from().unwrap().id;
     let username = msg.from().unwrap().username.clone().unwrap_or_else(|| "unknown".to_string());
     let chat_id = msg.chat.id;
+    println!("Got msg from {username} with content: {}", msg.text().unwrap());
     handle_command(bot, command, conn, i64::try_from(user_id.0).unwrap(), username, chat_id)
         .await.log_on_error().await;
     Ok(())
