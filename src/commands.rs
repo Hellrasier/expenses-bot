@@ -59,13 +59,18 @@ pub async fn handle_command(
                             bot.send_message(chat_id, message).await.log_on_error().await;
                         },
                         Err(e) => {
-                            eprintln!("Error getting expenses: {}", e);
+                            log::error!("Error getting expenses: {}", e);
                             bot.send_message(chat_id, "An error occured").await.log_on_error().await;
                         }
                     }
                 }
-                (Err(_), _) | (_, Err(_))  => {
-                    bot.send_message(chat_id, "Wrong date formats").await.log_on_error().await;
+                (Err(e), _)  => {
+                    log::error!("{}", e);
+                    bot.send_message(chat_id, "Wrong start date format").await.log_on_error().await;
+                }
+                (_, Err(e))  => {
+                    log::error!("{}", e);
+                    bot.send_message(chat_id, "Wrong end date format").await.log_on_error().await;
                 }
             }
         },
