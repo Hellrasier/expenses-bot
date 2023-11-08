@@ -16,7 +16,7 @@ pub async fn add_expense(pool: &PgPool, expense: &Expense) -> Result<u64, sqlx::
     Ok(result.rows_affected())
 }
 
-pub async fn get_expenses_by_date(pool: &PgPool, date_start: NaiveDate, date_end: NaiveDate) -> Result<Vec<Expense>, sqlx::Error> 
+pub async fn get_expenses_by_date(pool: &PgPool, date_start: NaiveDate, date_end: NaiveDate) -> Result<Vec<Expense>, sqlx::Error> { 
     query_as::<_, Expense>(
         "SELECT user_id, username, price, comments, date FROM new_expenses WHERE date >= $1 AND date < $2"
     )
