@@ -21,9 +21,14 @@ impl BotService {
 
         Dispatcher::builder(
             bot, 
-            Update::filter_message().endpoint(answer),
+            Update::filter_message()
+                .filter_command::<Command>()
+                .endpoint(answer)
         )
         .dependencies(dptree::deps![conn])
+        .default_handler(|upd| async move {
+            log::warn!("unhandled update: {:?}", upd);
+        })
         .build()
         .dispatch()
         .await;
@@ -36,7 +41,7 @@ async fn answer(bot: Bot, conn: PgPool, msg: Message, command: Command) -> Respo
     let user_id = msg.from().unwrap().id;
     let username = msg.from().unwrap().username.clone().unwrap_or_else(|| "unknown".to_string());
     let chat_id = msg.chat.id;
-    println!("Got msg from {username} with content: {}", msg.text().unwrap());
+    log::info!("Got msg from {username} with content: {}", msg.text().unwrap());
     handle_command(bot, command, conn, i64::try_from(user_id.0).unwrap(), username, chat_id)
         .await.log_on_error().await;
     Ok(())

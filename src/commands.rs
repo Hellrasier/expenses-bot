@@ -13,8 +13,8 @@ pub enum Command {
     Check {price: f64, comments: String },
     #[command(description = "get statistics.", parse_with = "split")]
     Stat { date_start: String, date_end: String },
-    #[command(description = "start", parse_with = "split")]
-    Start(),
+    #[command(description = "start")]
+    Start,
 }
 
 pub async fn handle_command(
@@ -62,7 +62,7 @@ pub async fn handle_command(
                 }
             }
         },
-        Command::Start() => {
+        Command::Start => {
             bot.send_message(chat_id, "Hello!").await.log_on_error().await;
         }
     }
